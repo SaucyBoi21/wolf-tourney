@@ -14,5 +14,17 @@ datasource db {
 }
 
 model Tournament {
-  id
+  id String @id @default(uuid())
+  name String
+  rounds Int
+  status String @default("ongoing")
+  startTime DateTime @default(now())
+  players Player[]
+}
+
+model Player {
+  id String @id @default(uuid())
+  name String
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+  tournamentId String
 }

@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useForm } from "react-hook-form"
 
-const TournamentForm = () => {
-  const [name, setName] = useState("");
-  const [rounds, setRounds] = useState(5)
+function TournamentForm () {
+
+  const  = () => {
+    
+  }
 };
