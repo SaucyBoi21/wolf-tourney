@@ -1,6 +1,6 @@
 import Player from "../Player/player";
 
-const PlayerList = () => {
+function PlayerList() {
   return (
     <>
       <h2>player list</h2>
