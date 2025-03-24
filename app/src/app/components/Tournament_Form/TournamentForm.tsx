@@ -17,7 +17,7 @@ interface TournamentFormData {
 
 function TournamentForm() {
   const { register, handleSubmit, control } = useForm<TournamentFormData>();
-  const {fields, append, remove} = useFieldArray(
+  const { fields, append, remove } = useFieldArray(
     {
       name: "players",
       control,
@@ -53,8 +53,24 @@ function TournamentForm() {
       </div>
 
       <div className="input-group">
-        <label>Players </label>
-        <input type="text" />
+        <label>Players: </label>
+        {fields.map((player, index) => (
+          <div key={player.id}>
+            <input
+              {...register(`players.${index}.name`)} placeholder="Name"
+              type="text" />
+            <input
+              {...register(`players.${index}.rating`)} placeholder="Rating"
+              type="number" />
+            <input
+              {...register(`players.${index}.uscfId`)} placeholder="USCF ID"
+              type="text" />
+            <input
+              {...register(`players.${index}.section`)} placeholder="Section" type="text" />
+            <button onClick={() => remove(index)}>Remove Player</button>
+          </div>
+        ))}
+        <button onClick={() => append({ name: "", rating: 0, uscfId: "", section: "" })} >Add Player</button>
       </div>
       <button type="submit">Create Tournament</button>
     </form>
