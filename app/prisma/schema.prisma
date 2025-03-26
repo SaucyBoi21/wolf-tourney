@@ -20,6 +20,7 @@ model Tournament {
   status String @default("ongoing")
   startTime DateTime @default(now())
   players Player[]
+  sections String[]
 }
 
 model Player {
