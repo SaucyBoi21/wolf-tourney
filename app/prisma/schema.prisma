@@ -19,8 +19,8 @@ model Tournament {
   rounds Int
   status String @default("ongoing")
   startTime DateTime @default(now())
-  players Player[]
   sections String[]
+  players Player[]
 }
 
 model Player {
