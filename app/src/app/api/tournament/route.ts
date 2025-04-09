@@ -4,15 +4,11 @@ import { PrismaClient, Prisma } from "@prisma/client"
 const prisma = new PrismaClient
 
 // POST create new tournament
-export async function POST(request:Request) {
+export async function POST(request: Request) {
 
     const body = await request.json()
 
-    const {name, rounds, status, sections} = body
-
-
-    
-    
+    const { name, rounds, status, sections } = body
 
     try {
 
@@ -26,7 +22,7 @@ export async function POST(request:Request) {
 
         return new Response(JSON.stringify(newTournament), {
             status: 201,
-            headers: {'Content-Type': 'application/json'}
+            headers: { 'Content-Type': 'application/json' }
         })
 
     }
@@ -34,6 +30,6 @@ export async function POST(request:Request) {
     catch (error) {
         return new Response(error)
     }
-    
+
 }
 
