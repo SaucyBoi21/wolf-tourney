@@ -6,17 +6,39 @@ const prisma = new PrismaClient()
 // POST create new tournament
 export async function POST(request: NextRequest) {
 
-    const body = await request.body
+    const body = await request.json()
+    const { name, rounds, sections, players } = body
+    
 
 
     const newTournament = await prisma.tournament.create({
-        data: body
+        data: {
+            name: name,
+            rounds: rounds,
+            sections: sections,
+            players: players
+        }
     })
 
-    return new Response(JSON.stringify(newTournament), {
-        status: 201,
-        headers: { 'Content-Type': 'application/json' }
+    return NextResponse.json(newTournament.id, { status: 201 })
+
+
+}
+
+// GET find tournament by ID
+export async function GET(request: NextRequest) {
+    const body = await request.json()
+    const {id} = body
+
+    const tournament = await prisma.tournament.findUnique({
+        where: {
+            id: id, 
+        },
+
+
     })
+
+    return NextResponse.json(tournament)
 
 }
 

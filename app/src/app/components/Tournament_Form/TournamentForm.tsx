@@ -1,5 +1,6 @@
 "use client";
 import { SubmitHandler, useForm, useFieldArray } from "react-hook-form";
+import axios from "axios";
 
 interface Player {
   name: string;
@@ -11,20 +12,22 @@ interface Player {
 interface TournamentFormData {
   name: string;
   rounds: number;
-  sections: string;
+  sections: string[];
   players: Player[];
 }
 
 function TournamentForm() {
   const { register, handleSubmit, control } = useForm<TournamentFormData>();
-  const { fields, append, remove } = useFieldArray(
-    {
-      name: "players",
-      control,
-    }
-  )
-  const onSubmit: SubmitHandler<TournamentFormData> = (data) => {
-    console.log(data);
+  const { fields, append, remove } = useFieldArray({
+    name: "players",
+    control,
+  });
+  const onSubmit: SubmitHandler<TournamentFormData> = async (data) => {
+    const { name, rounds } = data;
+    const response = await axios.post("/api/tournament", {
+      name: name,
+      rounds: Number(rounds),
+    });
   };
 
   return (
@@ -47,30 +50,45 @@ function TournamentForm() {
             required: true,
             validate: (value) => value >= 1,
           })}
-          type="text"
+          type="number"
           placeholder=""
         />
       </div>
 
       <div className="input-group">
-        <label>Players: </label>
+        <label>Players </label>
         {fields.map((player, index) => (
           <div key={player.id}>
             <input
-              {...register(`players.${index}.name`)} placeholder="Name"
-              type="text" />
+              {...register(`players.${index}.name`)}
+              placeholder="Name"
+              type="text"
+            />
             <input
-              {...register(`players.${index}.rating`)} placeholder="Rating"
-              type="number" />
+              {...register(`players.${index}.rating`)}
+              placeholder="Rating"
+              type="number"
+            />
             <input
-              {...register(`players.${index}.uscfId`)} placeholder="USCF ID"
-              type="text" />
+              {...register(`players.${index}.uscfId`)}
+              placeholder="USCF ID"
+              type="text"
+            />
             <input
-              {...register(`players.${index}.section`)} placeholder="Section" type="text" />
+              {...register(`players.${index}.section`)}
+              placeholder="Section"
+              type="text"
+            />
             <button onClick={() => remove(index)}>Remove Player</button>
           </div>
         ))}
-        <button onClick={() => append({ name: "", rating: 0, uscfId: "", section: "" })} >Add Player</button>
+        <button
+          onClick={() =>
+            append({ name: "", rating: 0, uscfId: "", section: "" })
+          }
+        >
+          Add Player
+        </button>
       </div>
       <button type="submit">Create Tournament</button>
     </form>
