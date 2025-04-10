@@ -1,35 +1,22 @@
 import { NextResponse, NextRequest } from "next/server"
 import { PrismaClient, Prisma } from "@prisma/client"
 
-const prisma = new PrismaClient
+const prisma = new PrismaClient()
 
 // POST create new tournament
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
 
-    const body = await request.json()
+    const body = await request.body
 
-    const { name, rounds, status, sections } = body
 
-    try {
+    const newTournament = await prisma.tournament.create({
+        data: body
+    })
 
-        const newTournament = prisma.tournament.create({
-            data: {
-                name: name,
-                rounds: rounds,
-                sections: sections,
-            }
-        })
-
-        return new Response(JSON.stringify(newTournament), {
-            status: 201,
-            headers: { 'Content-Type': 'application/json' }
-        })
-
-    }
-
-    catch (error) {
-        return new Response(error)
-    }
+    return new Response(JSON.stringify(newTournament), {
+        status: 201,
+        headers: { 'Content-Type': 'application/json' }
+    })
 
 }
 
