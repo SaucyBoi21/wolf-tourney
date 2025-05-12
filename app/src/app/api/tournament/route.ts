@@ -20,6 +20,7 @@ export async function POST(request: NextRequest) {
         }
     })
 
+
     return NextResponse.json(newTournament.id, { status: 201 })
 
 

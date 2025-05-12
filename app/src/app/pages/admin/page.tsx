@@ -1,15 +1,13 @@
 "use client";
 import { useState } from "react";
+import TournamentForm from "@/app/components/Tournament_Form/TournamentForm";
 
 const Admin = () => {
-  return (
-    <div className="admin-page">
-      <h1>Admin Dashboard</h1>
-      <section>
-        <h2>Create a New Tournament</h2>
-      </section>
-      <section>Manage Ongoing Tournament</section>
-    </div>
+  return ( 
+  <>
+    <h1>Admin</h1>
+    <TournamentForm />
+  </>
   );
 };
 
