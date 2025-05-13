@@ -6,16 +6,16 @@ const prisma = new PrismaClient()
 // POST create new player
 export async function POST(request: NextRequest) {
     const body = await request.json()
-    const {name, tournament, tournamentId, uscfId, rating, section} = body
+    const {name, uscfId, rating, sectionId} = body
 
     const newPlayer = await prisma.player.create({
         data: {
             name: name,
-            tournament: tournament,
-            tournamentId: tournamentId,
-            uscfId: uscfId,
             rating: rating,
-            section: section
+            uscfId: uscfId,
+            section: {
+                connect: {id: sectionId}
+            }
         }
     })
 
