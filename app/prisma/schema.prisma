@@ -13,63 +13,77 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// schema.prisma
+
 model Tournament {
-  id String @id @default(uuid())
-  name String
-  rounds Int
-  status String @default("ongoing")
-  startTime DateTime @default(now())
-  sections String[] @default(["U1400", "U1800", "Open"])
-  players Player[]
+  id        Int       @id @default(autoincrement())
+  name      String
+  active    Boolean   @default(true)
+
+  sections  Section[]
+}
+
+model Section {
+  id           Int         @id @default(autoincrement())
+  name         String
+  tournamentId Int
+  tournament   Tournament  @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  players      Player[]
+  rounds       Round[]
 }
 
 model Player {
-  id String @id @default(uuid())
-  name String
-  tournament Tournament @relation(fields: [tournamentId], references: [id])
-  tournamentId String
+  id         Int       @id @default(autoincrement())
+  name       String
+  uscfId     String?   @unique
+  rating     Int?
+  sectionId  Int
+  section    Section   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  playerRoundStatuses PlayerRoundStatus[]
+  whitePairings       Pairing[] @relation("WhitePlayer")
+  blackPairings       Pairing[] @relation("BlackPlayer")
 }
 
+model Round {
+  id         Int       @id @default(autoincrement())
+  number     Int
+  sectionId  Int
+  section    Section   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
 
-// NextAuth models
-
-model User {
-  id            String   @id @default(cuid())
-  name          String?
-  email         String?  @unique
-  emailVerified DateTime?
-  password      String? // For credentials provider
-  sessions      Session[]
-  accounts      Account[]
+  pairings   Pairing[]
+  playerRoundStatuses PlayerRoundStatus[]
 }
 
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  user         User     @relation(fields: [userId], references: [id])
-  expires      DateTime
+model Pairing {
+  id             Int     @id @default(autoincrement())
+  roundId        Int
+  round          Round   @relation(fields: [roundId], references: [id], onDelete: Cascade)
+
+  whitePlayerId  Int
+  whitePlayer    Player  @relation("WhitePlayer", fields: [whitePlayerId], references: [id])
+
+  blackPlayerId  Int?
+  blackPlayer    Player? @relation("BlackPlayer", fields: [blackPlayerId], references: [id])
+
+  result         String? // you can define an enum if you prefer: e.g. '1-0', '0-1', '½-½', 'bye'
 }
 
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  user              User    @relation(fields: [userId], references: [id])
-  type              String
-  provider          String
-  providerAccountId String
-  access_token      String?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  expires_at        Int?
-  refresh_token     String?
-  session_state     String?
+model PlayerRoundStatus {
+  id        Int       @id @default(autoincrement())
+  playerId  Int
+  player    Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  roundId   Int
+  round     Round     @relation(fields: [roundId], references: [id], onDelete: Cascade)
+
+  status    PlayerStatus
 }
 
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-  @@unique([identifier, token])
+enum PlayerStatus {
+  playing
+  bye
+  dropped
 }
+
