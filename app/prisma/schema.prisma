@@ -16,7 +16,7 @@ datasource db {
 // schema.prisma
 
 model Tournament {
-  id        Int       @id @default(autoincrement())
+  id        String @id @default(uuid()) @db.Uuid
   name      String
   active    Boolean   @default(true)
 
@@ -24,9 +24,9 @@ model Tournament {
 }
 
 model Section {
-  id           Int         @id @default(autoincrement())
+  id           String         @id @default(uuid())
   name         String
-  tournamentId Int
+  tournamentId String
   tournament   Tournament  @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
 
   players      Player[]
@@ -34,11 +34,11 @@ model Section {
 }
 
 model Player {
-  id         Int       @id @default(autoincrement())
+  id         String @id @default(uuid())
   name       String
   uscfId     String?   @unique
   rating     Int?
-  sectionId  Int
+  sectionId  String
   section    Section   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
 
   playerRoundStatuses PlayerRoundStatus[]
@@ -47,36 +47,36 @@ model Player {
 }
 
 model Round {
-  id         Int       @id @default(autoincrement())
+  id         String @id @default(uuid())
   number     Int
-  sectionId  Int
-  section    Section   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  sectionId  String
+  section    Section   @relation(fields: [sectionId], references: [id])
 
   pairings   Pairing[]
   playerRoundStatuses PlayerRoundStatus[]
 }
 
 model Pairing {
-  id             Int     @id @default(autoincrement())
-  roundId        Int
-  round          Round   @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  id             String @id @default(uuid())
+  roundId        String
+  round          Round   @relation(fields: [roundId], references: [id])
 
-  whitePlayerId  Int
+  whitePlayerId  String
   whitePlayer    Player  @relation("WhitePlayer", fields: [whitePlayerId], references: [id])
 
-  blackPlayerId  Int?
+  blackPlayerId  String?
   blackPlayer    Player? @relation("BlackPlayer", fields: [blackPlayerId], references: [id])
 
   result         String? // you can define an enum if you prefer: e.g. '1-0', '0-1', '½-½', 'bye'
 }
 
 model PlayerRoundStatus {
-  id        Int       @id @default(autoincrement())
-  playerId  Int
-  player    Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  id        String @id @default(uuid())
+  playerId  String
+  player    Player    @relation(fields: [playerId], references: [id])
 
-  roundId   Int
-  round     Round     @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  roundId   String
+  round     Round     @relation(fields: [roundId], references: [id])
 
   status    PlayerStatus
 }
