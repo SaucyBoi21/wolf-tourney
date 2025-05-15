@@ -16,70 +16,73 @@ datasource db {
 // schema.prisma
 
 model Tournament {
-  id        String @id @default(uuid()) @db.Uuid
-  name      String
-  rounds    Int
-  active    Boolean   @default(true)
+  id     String  @id @default(uuid()) @db.Uuid
+  name   String
+  rounds Int
+  active Boolean @default(true)
 
-  sections  Section[]
+  sections Section[]
 }
 
 model Section {
-  id           String         @id @default(uuid()) @db.Uuid
+  id           String     @id @default(uuid()) @db.Uuid
   name         String
-  tournamentId String
-  tournament   Tournament  @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  minRating    Int
+  maxRating    Int
+  tournamentId String     @db.Uuid
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
 
-  players      Player[]
-  rounds       Round[]
+  players Player[]
+  rounds  Round[]
 }
 
 model Player {
-  id         String @id @default(uuid()) @db.Uuid
-  name       String
-  uscfId     String?   @unique
-  rating     Int?
-  sectionId  String
-  section    Section   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  id        String  @id @default(uuid()) @db.Uuid
+  name      String
+  uscfId    String? @unique
+  rating    Int?
+  playingUp Boolean
+  sectionId String  @db.Uuid
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
 
   playerRoundStatuses PlayerRoundStatus[]
-  whitePairings       Pairing[] @relation("WhitePlayer")
-  blackPairings       Pairing[] @relation("BlackPlayer")
+  whitePairings       Pairing[]           @relation("WhitePlayer")
+  blackPairings       Pairing[]           @relation("BlackPlayer")
 }
 
 model Round {
-  id         String @id @default(uuid()) @db.Uuid
-  number     Int
-  sectionId  String
-  section    Section   @relation(fields: [sectionId], references: [id])
+  id        String  @id @default(uuid()) @db.Uuid
+  number    Int
+  sectionId String  @db.Uuid
+  section   Section @relation(fields: [sectionId], references: [id])
 
-  pairings   Pairing[]
+  pairings            Pairing[]
   playerRoundStatuses PlayerRoundStatus[]
 }
 
 model Pairing {
-  id             String @id @default(uuid()) @db.Uuid
-  roundId        String
-  round          Round   @relation(fields: [roundId], references: [id])
+  id      String @id @default(uuid()) @db.Uuid
+  roundId String @db.Uuid
+  round   Round  @relation(fields: [roundId], references: [id])
 
-  whitePlayerId  String
-  whitePlayer    Player  @relation("WhitePlayer", fields: [whitePlayerId], references: [id])
+  whitePlayerId String @db.Uuid
+  whitePlayer   Player @relation("WhitePlayer", fields: [whitePlayerId], references: [id])
 
-  blackPlayerId  String?
-  blackPlayer    Player? @relation("BlackPlayer", fields: [blackPlayerId], references: [id])
+  blackPlayerId String? @db.Uuid
+  blackPlayer   Player? @relation("BlackPlayer", fields: [blackPlayerId], references: [id])
 
-  result         String? // you can define an enum if you prefer: e.g. '1-0', '0-1', '½-½', 'bye'
+  result String? // you can define an enum if you prefer: e.g. '1-0', '0-1', '½-½', 'bye'
 }
 
 model PlayerRoundStatus {
-  id        String @id @default(uuid()) @db.Uuid
-  playerId  String
-  player    Player    @relation(fields: [playerId], references: [id])
+  id       String @id @default(uuid()) @db.Uuid
+  playerId String @db.Uuid
+  player   Player @relation(fields: [playerId], references: [id])
 
-  roundId   String
-  round     Round     @relation(fields: [roundId], references: [id])
+  roundId String @db.Uuid
+  round   Round  @relation(fields: [roundId], references: [id])
 
-  status    PlayerStatus
+  status PlayerStatus
 }
 
 enum PlayerStatus {

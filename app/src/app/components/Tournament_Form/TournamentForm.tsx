@@ -12,6 +12,7 @@ interface Player {
   playerName: string;
   rating: number;
   uscfId: string;
+  playingUp: boolean;
   sectionId: string;
 }
 
@@ -23,6 +24,8 @@ interface Round {
 interface Section {
   sectionName: string;
   tournamentId: string;
+  minRating: number;
+  maxRating: number;
   players: Player[];
   rounds: Round[];
 }
@@ -37,6 +40,8 @@ interface TournamentFormData {
 const createEmptySection = (): Section => ({
   sectionName: "",
   tournamentId: "",
+  minRating: 0,
+  maxRating: 3000,
   players: [],
   rounds: [],
 });
@@ -61,10 +66,12 @@ function TournamentForm() {
     });
     const queue = new PQueue({ concurrency: 5 });
     sections.forEach((section) => {
-      const { sectionName } = section;
+      const { sectionName, minRating, maxRating } = section;
       queue.add(() =>
         axios.post("/api/section", {
           name: sectionName,
+          minRating: minRating,
+          maxRating: maxRating,
           tournamentId: tournamentResponse.data,
         })
       );
@@ -89,35 +96,79 @@ function TournamentForm() {
       <div className="input-group">
         <label>Number of Rounds </label>
         <input
-          {...register("tournament.rounds", {
+          {...register("tournament.numRounds", {
             required: true,
+            valueAsNumber: true,
             validate: (value) => value >= 1,
           })}
           type="number"
-          placeholder=""
+          placeholder="0"
         />
       </div>
 
       <h3>Sections</h3>
-      {sectionFields.map((field, index) => (
-        <div key={field.id}>
-          <input
-            placeholder="Section Name"
-            {...register(`sections.${index}.sectionName`)}
-          />
-          <button type="button" onClick={() => removeSection(index)}>
-            Remove
-          </button>
-        </div>
-      ))}
+      {sectionFields.map((field, index) => {
+        const {
+          fields: playerFields,
+          append: appendPlayer,
+          remove: removePlayer,
+        } = useFieldArray({ name: "players", control });
+
+        return (
+          <div key={field.id}>
+            <input
+              placeholder="Section Name"
+              {...register(`sections.${index}.sectionName`)}
+            />
+            <input
+              type="number"
+              placeholder="Min Rating"
+              {...register(`sections.${index}.minRating`)}
+            />
+            <input
+              type="number"
+              placeholder="Max Rating"
+              {...register(`sections.${index}.maxRating`)}
+            />
+
+            <h4>Players in this Section</h4>
+            {playerFields.map((field, playerIndex) => (
+              <div key={field.id}>
+                <input
+                  placeholder="Player Name"
+                  {...register(
+                    `sections.${index}.players.${playerIndex}.playerName`
+                  )}
+                />
+                <input
+                  placeholder="USCF ID"
+                  {...register(
+                    `sections.${index}.players.${playerIndex}.uscfId`
+                  )}
+                />
+                <input
+                  placeholder="Rating"
+                  type="number"
+                  {...register(
+                    `sections.${index}.players.${playerIndex}.rating`
+                  )}
+                />
+              </div>
+            ))}
+            <button type="button" onClick={() => removeSection(index)}>
+              Remove
+            </button>
+          </div>
+        );
+      })}
 
       <button type="button" onClick={() => appendSection(createEmptySection())}>
         Add Section
       </button>
 
-      <br /><br />
+      <br />
+      <br />
       <input type="submit" value="Create Tournament" />
-
     </form>
   );
 }

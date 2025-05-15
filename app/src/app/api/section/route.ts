@@ -8,11 +8,13 @@ const prisma = new PrismaClient()
 // POST - create new section
 export async function POST(request:NextRequest) {
     const body = await request.json()
-    const {name, tournamentId} = body
+    const {name, minRating, maxRating, tournamentId} = body
 
     const newSection = await prisma.section.create({
         data: {
-            name: name, 
+            name: name,
+            minRating: minRating,
+            maxRating: maxRating, 
             tournament: {
                 connect: {id: tournamentId}
             }

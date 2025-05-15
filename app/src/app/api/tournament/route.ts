@@ -7,11 +7,12 @@ const prisma = new PrismaClient()
 export async function POST(request: NextRequest) {
 
     const body = await request.json()
-    const { name } = body
+    const { name, rounds } = body
     
     const newTournament = await prisma.tournament.create({
         data: {
             name: name,
+            rounds: rounds,
         }
     })
 

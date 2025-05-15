@@ -3,7 +3,7 @@ import { Prisma, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient()
 
-// GET - get round byTid
+// GET - get round by id
 
 // POST - create new round
 export async function POST(request: NextRequest) {
