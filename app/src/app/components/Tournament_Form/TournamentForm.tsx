@@ -1,41 +1,84 @@
 "use client";
 import { SubmitHandler, useForm, useFieldArray } from "react-hook-form";
 import axios from "axios";
+import PQueue from "p-queue";
+
+interface Tournament {
+  tournamentName: string;
+  numRounds: number;
+}
 
 interface Player {
-  name: string;
+  playerName: string;
   rating: number;
   uscfId: string;
-  section: string;
+  sectionId: string;
+}
+
+interface Round {
+  roundNumber: number;
+  sectionId: string;
+}
+
+interface Section {
+  sectionName: string;
+  tournamentId: string;
+  players: Player[];
+  rounds: Round[];
 }
 
 interface TournamentFormData {
-  name: string;
-  rounds: number;
-  sections: string[];
+  tournament: Tournament;
   players: Player[];
+  rounds: Round[];
+  sections: Section[];
 }
+
+const createEmptySection = (): Section => ({
+  sectionName: "",
+  tournamentId: "",
+  players: [],
+  rounds: [],
+});
 
 function TournamentForm() {
   const { register, handleSubmit, control } = useForm<TournamentFormData>();
-  const { fields, append, remove } = useFieldArray({
-    name: "players",
+  const {
+    fields: sectionFields,
+    append: appendSection,
+    remove: removeSection,
+  } = useFieldArray({
+    name: "sections",
     control,
   });
+
   const onSubmit: SubmitHandler<TournamentFormData> = async (data) => {
-    const { name, rounds } = data;
-    const response = await axios.post("/api/tournament", {
-      name: name,
-      rounds: Number(rounds),
+    const { tournament, players, rounds, sections } = data;
+    const { tournamentName, numRounds } = tournament;
+    const tournamentResponse = await axios.post("/api/tournament", {
+      name: tournamentName,
+      rounds: numRounds,
     });
+    const queue = new PQueue({ concurrency: 5 });
+    sections.forEach((section) => {
+      const { sectionName } = section;
+      queue.add(() =>
+        axios.post("/api/section", {
+          name: sectionName,
+          tournamentId: tournamentResponse.data,
+        })
+      );
+    });
+    await queue.onIdle();
   };
 
   return (
     <form className="tournament-form" onSubmit={handleSubmit(onSubmit)}>
+      <h2>Create Tournament</h2>
       <div className="input-group">
-        <label>Tournament Name </label>
+        <label>Tournament Name</label>
         <input
-          {...register("name", {
+          {...register("tournament.tournamentName", {
             required: true,
           })}
           type="text"
@@ -46,7 +89,7 @@ function TournamentForm() {
       <div className="input-group">
         <label>Number of Rounds </label>
         <input
-          {...register("rounds", {
+          {...register("tournament.rounds", {
             required: true,
             validate: (value) => value >= 1,
           })}
@@ -55,42 +98,26 @@ function TournamentForm() {
         />
       </div>
 
-      <div className="input-group">
-        <label>Players </label>
-        {fields.map((player, index) => (
-          <div key={player.id}>
-            <input
-              {...register(`players.${index}.name`)}
-              placeholder="Name"
-              type="text"
-            />
-            <input
-              {...register(`players.${index}.rating`)}
-              placeholder="Rating"
-              type="number"
-            />
-            <input
-              {...register(`players.${index}.uscfId`)}
-              placeholder="USCF ID"
-              type="text"
-            />
-            <input
-              {...register(`players.${index}.section`)}
-              placeholder="Section"
-              type="text"
-            />
-            <button onClick={() => remove(index)}>Remove Player</button>
-          </div>
-        ))}
-        <button
-          onClick={() =>
-            append({ name: "", rating: 0, uscfId: "", section: "" })
-          }
-        >
-          Add Player
-        </button>
-      </div>
-      <button type="submit">Create Tournament</button>
+      <h3>Sections</h3>
+      {sectionFields.map((field, index) => (
+        <div key={field.id}>
+          <input
+            placeholder="Section Name"
+            {...register(`sections.${index}.sectionName`)}
+          />
+          <button type="button" onClick={() => removeSection(index)}>
+            Remove
+          </button>
+        </div>
+      ))}
+
+      <button type="button" onClick={() => appendSection(createEmptySection())}>
+        Add Section
+      </button>
+
+      <br /><br />
+      <input type="submit" value="Create Tournament" />
+
     </form>
   );
 }

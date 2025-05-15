@@ -10,7 +10,7 @@ export async function POST(request:NextRequest) {
     const body = await request.json()
     const {name, tournamentId} = body
 
-    const newSection = await prisma.player.create({
+    const newSection = await prisma.section.create({
         data: {
             name: name, 
             tournament: {
