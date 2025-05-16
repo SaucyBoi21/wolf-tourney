@@ -1,5 +1,5 @@
-import PlayerList from "@/app/components/Player_List/player_list";
-import TournamentForm from "@/app/components/Tournament_Form/TournamentForm";
+import PlayerList from "@/app/components/PlayerList/player_list";
+import TournamentForm from "@/app/components/TournamentForm/TournamentForm";
 
 const Tournaments = () => {
   return <>
