@@ -46,6 +46,14 @@ const createEmptySection = (): Section => ({
   rounds: [],
 });
 
+const createEmptyPlayer = (): Player => ({
+  playerName: "",
+  uscfId: "",
+  rating: 0,
+  playingUp: true,
+  sectionId: "",
+});
+
 function TournamentForm() {
   const { register, handleSubmit, control } = useForm<TournamentFormData>();
   const {
@@ -153,10 +161,27 @@ function TournamentForm() {
                     `sections.${index}.players.${playerIndex}.rating`
                   )}
                 />
+                <p>Playing Up?</p>
+                <input
+                  type="checkbox"
+                  {...register(
+                    `sections.${index}.players.${playerIndex}.playingUp`
+                  )}
+                />
+                <button type="button" onClick={() => removePlayer(playerIndex)}>
+                  Remove Player
+                </button>
               </div>
             ))}
+
+            <button
+              type="button"
+              onClick={() => appendPlayer(createEmptyPlayer())}
+            >
+              Add Player
+            </button>
             <button type="button" onClick={() => removeSection(index)}>
-              Remove
+              Remove Section
             </button>
           </div>
         );
